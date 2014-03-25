@@ -3,19 +3,29 @@
 {% block title %}Глоссарий СКБ СТУ{% endblock %}
 
 {% block style %}
+    <link rel="stylesheet" href="{% static "kendoui/styles/kendo.common.min.css" %}"/>
+    <link rel="stylesheet" href="{% static "kendoui/styles/kendo.bootstrap.min.css" %}"/>
     <link rel="stylesheet" href="{% static "css/index.css" %}"/>
-    <link rel="stylesheet" href="{% static "bootstrap/css/bootstrap.min.css" %}"/>
 {% endblock %}
 
 {% block script %}
+    <script src="{% static "kendoui/js/kendo.web.min.js" %}"></script>
+    <script src="{% static "kendoui/cultures/kendo.culture.ru.js" %}"></script>
     <script src="{% static "js/index.js" %}" ></script>
 {% endblock %}
 
-{% block main_header %}
-
-{% endblock %}
-
 {% block content %}
+
+
+    <div id="terms"></div>
+    <div id="pager" class="k-pager-wrap"></div>
+
+    <script type="text/x-kendo-template" id="term_template">
+        <div class="term_item" >
+            <span class="title">#=title#</span>
+            <p  class="description">#=description#</p>
+        </div>
+    </script>
 
 
 {% endblock %}

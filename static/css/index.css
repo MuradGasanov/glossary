@@ -1,0 +1,32 @@
+.title {
+    display: block;
+    font-weight: bold;
+    font-size: 25px;
+}
+
+.description {
+    font-size: 15px;
+}
+
+#terms.k-widget {
+    box-shadow: none;
+    border-style: none;
+    border-width: initial;
+    -webkit-appearance: none;
+}
+
+.term_item {
+    color: #777;
+    padding: 5px 15px;
+}
+
+.term_item .description {
+    text-align:justify;
+}
+
+.k-pager-wrap {
+    background-color: #f8f8f8;
+    border-radius: 4px;
+    border-color: #e7e7e7;
+}
+
