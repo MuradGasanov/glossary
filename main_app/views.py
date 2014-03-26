@@ -5,7 +5,10 @@ import json
 
 
 def index(request):
-    return render_to_response("index.html")
+    titles = models.Term.objects.extra(
+        select={"t": "UPPER(LEFT(title,1))"}
+    ).values_list("t", flat=True).distinct().order_by("t")
+    return render_to_response("index.html", {"titles": titles})
 
 
 def get_terms(request):
@@ -13,26 +16,27 @@ def get_terms(request):
     if "options" in request.POST:
         options = json.loads(request.POST.get("options"))
 
-    total = models.Term.objects.all().count()
+    terms = models.Term.objects.all()
+    total = terms.count()
 
     if options:
-        skip = options.get("skip", 0)
-        take = options.get("take", 0)
+        skip = options.get("skip", None)
+        take = options.get("take", None)
         query = options.get("query", "")
+        start_width = options.get("start_width", False)
+
         if query:
-            terms = models.Term.objects.filter(title__icontains=query)
-            total = terms.count()
-        else:
-            terms = models.Term.objects.all()[skip:skip + take]
-    else:
-        terms = models.Term.objects.all()
+            if start_width:
+                terms = terms.filter(title__istartswith=query)
+            else:
+                terms = terms.filter(title__icontains=query)
+
+        total = terms.count()
+        terms = terms[skip:skip + take]
 
     items = list(terms.values("title", "description"))
 
-    if items:
-        return HttpResponse(json.dumps({"items": items, "total": total}), content_type="application/json")
-    else:
-        return HttpResponse(json.dumps(""), content_type="application/json")
+    return HttpResponse(json.dumps({"items": items, "total": total}), content_type="application/json")
 
 
 def search_suggestions(request):

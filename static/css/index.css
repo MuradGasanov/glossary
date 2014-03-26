@@ -30,3 +30,16 @@
     border-color: #e7e7e7;
 }
 
+#index {
+    text-align: center;
+    font-size: 20px;
+}
+
+.letter {
+    margin-right: 3px;
+}
+
+a:hover {
+    cursor: hand;
+    cursor: pointer;
+}

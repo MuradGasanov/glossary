@@ -16,6 +16,13 @@
 
 {% block content %}
 
+    <div id="index">
+        {% for title in titles %}
+            <a class="letter" title="Слова на букву {{ title|slice:":1" }}">{{ title|slice:":1" }}</a>
+        {% empty %}
+            <a href="http://google.com" title="но я могу предложить кое-что другое">Извините, мне нечего вам показать</a>
+        {% endfor %}
+    </div>
 
     <div id="terms"></div>
     <div id="pager" class="k-pager-wrap"></div>
@@ -27,5 +34,11 @@
         </div>
     </script>
 
+{% endblock %}
 
+{% block footer_script %}
+{#    <script src="{% static "js/gremlins.min.js" %}"></script>#}
+{#    <script>#}
+{#        gremlins.createHorde().unleash();#}
+{#    </script>#}
 {% endblock %}
