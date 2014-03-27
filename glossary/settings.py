@@ -94,10 +94,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT = ''
+STATIC_ROOT = os.path.join(BASE_DIR, '../glossary_static')
 
 STATICFILES_DIRS = (
-    'static_content/static/',
+    'static',
 )
 
 TEMPLATE_DIRS = os.path.join(BASE_DIR, 'templates')
