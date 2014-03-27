@@ -101,3 +101,8 @@ STATICFILES_DIRS = (
 )
 
 TEMPLATE_DIRS = 'templates'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+}
