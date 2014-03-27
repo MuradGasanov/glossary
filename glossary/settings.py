@@ -20,7 +20,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SECRET_KEY = '46^ky__p9_w7y@)ot*x=jb*%f0wn1z&-6*k+sxdx_dxj5njv(n'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+import socket
+
+if socket.gethostname() in ("murad-pc",):
+    DEBUG = True
+else:
+    DEBUG = False
 
 TEMPLATE_DEBUG = True
 
