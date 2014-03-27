@@ -29,7 +29,7 @@ else:
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -94,7 +94,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = ''
 
 STATICFILES_DIRS = (
-    'static',
+    'static_content',
 )
 
 TEMPLATE_DIRS = 'templates'

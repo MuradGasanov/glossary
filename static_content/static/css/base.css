@@ -2,10 +2,15 @@ body {
     padding-top: 20px;
     padding-bottom: 20px;
     color: #777;
+    background-color: #eee;
 }
 
 .navbar {
     margin-bottom: 20px;
+}
+
+.navbar-form {
+    margin-top: 10px;
 }
 
 .form-control {
