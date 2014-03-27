@@ -100,7 +100,7 @@ STATICFILES_DIRS = (
     'static_content',
 )
 
-TEMPLATE_DIRS = 'templates'
+TEMPLATE_DIRS = os.path.join(BASE_DIR, 'templates')
 
 LOGGING = {
     'version': 1,
