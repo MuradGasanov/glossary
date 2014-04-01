@@ -27,6 +27,12 @@ if socket.gethostname() in ("murad-pc",):
 else:
     DEBUG = False
 
+ADMINS = (
+    ('Murad Gasanov', 'gmn1791@ya.ru'),
+)
+
+MANAGERS = ADMINS
+
 TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'glossary.apertura.su']
