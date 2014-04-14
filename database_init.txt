@@ -1,0 +1,6 @@
+mysql -uroot -p'ROOTPASSWORD'
+
+
+CREATE DATABASE glossary CHARACTER SET utf8 COLLATE utf8_general_ci;
+CREATE USER 'glossary'@'localhost' IDENTIFIED BY 'glossary';
+GRANT ALL PRIVILEGES ON glossary.* TO ‘glossary'@'localhost';
