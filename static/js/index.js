@@ -6,16 +6,47 @@ $(document).ready(function (e) {
 
     var BASE_URL = "/";
 
+    var TIMEOUT = 3000;
+
     var GLOBAL_OPTIONS = {
         query: "",
         start_width: false
     };
 
+    var MESSAGE = {
+        wait: "Загрузка...",
+        error: "Ошибка: "
+    };
+
+    $("#logout").click(function () {
+        document.location.href='/logout/';
+    });
+
+    function title_render() {
+        $.post("/get_titles/", { },function (data) {
+            var index = $("#index");
+            index.empty();
+            if (data.items.length > 0) {
+                $.each(data.items, function (i, o) {
+                    index.append(
+                        '<a class="letter" title="Слова на букву '+o+'">'+o+'</a>'
+                    )
+                });
+            } else {
+//                index.append(
+//                    '<a href="http://google.com" title="но я могу предложить кое-что другое">Извините, мне нечего вам показать</a>'
+//                )
+            }
+        }, "json").fail(function (data) {
+            noti({title: MESSAGE.error + data.status, message: data.statusText}, "error", TIMEOUT);
+        });
+    }
+    title_render();
     var terms_data_source = new kendo.data.DataSource({
         type: "json",
         transport: {
             read: {
-                url: BASE_URL + "terms/",
+                url: BASE_URL + "term/read/",
                 dataType: "json",
                 type: "POST"
             },
@@ -30,9 +61,6 @@ $(document).ready(function (e) {
                     return {options: kendo.stringify(o)};
                 }
             }
-        },
-        requestEnd: function (e) {
-
         },
         pageSize: 15,
         serverPaging: true,
@@ -107,7 +135,7 @@ $(document).ready(function (e) {
         return false;
     });
 
-    $(".letter").click(function(e) {
+    $("#index").on("click", ".letter", function(e) {
         GLOBAL_OPTIONS.query = $(this).text();
         GLOBAL_OPTIONS.start_width = true;
         pager.page(1);
@@ -120,6 +148,101 @@ $(document).ready(function (e) {
         GLOBAL_OPTIONS.start_width = false;
         pager.page(1);
         terms_data_source.read();
+        return false;
+    });
+
+    var term_model = kendo.observable({
+        is_edit: false,
+        o: {
+            id: 0,
+            title: "",
+            description: ""
+        }
+    });
+    kendo.bind("#change_term", term_model);
+    var term_validator = $("#change_term").kendoValidator({
+        rules: {
+            required: function (input) {
+                if (input.is("[required]")) {
+                    input.val($.trim(input.val())); //удалить обертывающиепробелы
+                    return input.val() !== "";
+                } else return true;
+            }
+        },
+        messages: {
+            required: "Поле не может быть пустым"
+        }
+    }).data("kendoValidator");
+    var change_term_window = $("#change_term_window");
+
+    $(".add_term").click(function () {
+        $(".k-widget.k-tooltip.k-tooltip-validation.k-invalid-msg").hide();
+        term_model.set("is_edit", false);
+        term_model.set("o", {
+            id: 0,
+            title: "",
+            description: ""
+        });
+        change_term_window.modal("show");
+    });
+
+    function term_response_handler(response) {
+        console.log(response);
+        var data = terms_data_source.get(response.id);
+        if (data) {
+            data.title = response.title;
+            data.description = response.description;
+        } else {
+            terms_data_source.insert(0, response);
+        }
+        noti();
+        terms.refresh();
+        title_render();
+        change_term_window.modal("hide");
+    }
+
+    $("#term_save").click(function () {
+        if (!term_validator.validate()) return false;
+        var send = term_model.get("o");
+        noti({message: MESSAGE.wait}, "wait");
+        $.post("term/" + (term_model.get("is_edit") ? "update/" : "create/"),
+            { item: JSON.stringify(send) }, term_response_handler, "json").fail(function (data) {
+                noti({title: MESSAGE.error + data.status, message: data.statusText}, "error", TIMEOUT);
+            });
+        return false;
+    });
+
+    $("#terms").on("click", ".edit_term", function (e) {
+        var that = $(this);
+        var uid = that.closest(".term_item").data("uid");
+        var dataItem = terms_data_source.getByUid(uid);
+        if (dataItem) {
+            $(".k-widget.k-tooltip.k-tooltip-validation.k-invalid-msg").hide();
+            term_model.set("is_edit", true);
+            term_model.set("o", {
+                id: dataItem.id,
+                title: dataItem.title,
+                description: dataItem.description
+            });
+            change_term_window.modal("show");
+        }
+        return false;
+    });
+
+    $("#terms").on("click", ".remove_term", function (e) {
+        if (!confirm("Вы точно хотите удалить запись?")) return false;
+        var that = $(this);
+        var uid = that.closest(".term_item").data("uid");
+        var dataItem = terms_data_source.getByUid(uid);
+        if (dataItem) {
+            var send = { id: dataItem.id };
+            $.post("term/remove/", { item: JSON.stringify(send) }, function (data) {
+                terms_data_source.remove(dataItem);
+                title_render();
+            }, "json").fail(function (data) {
+                noti({title: MESSAGE.error + data.status, message: data.statusText}, "error", TIMEOUT);
+            });
+        }
         return false;
     });
 

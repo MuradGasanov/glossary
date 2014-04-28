@@ -3,25 +3,41 @@
 {% block title %}Глоссарий СКБ СТУ{% endblock %}
 
 {% block style %}
-    <link rel="stylesheet" href="{% static "kendoui/styles/kendo.common.min.css" %}"/>
-    <link rel="stylesheet" href="{% static "kendoui/styles/kendo.bootstrap.min.css" %}"/>
     <link rel="stylesheet" href="{% static "css/index.css" %}"/>
 {% endblock %}
 
 {% block script %}
-    <script src="{% static "kendoui/js/kendo.web.min.js" %}"></script>
-    <script src="{% static "kendoui/cultures/kendo.culture.ru.js" %}"></script>
     <script src="{% static "js/index.js" %}" ></script>
+{% endblock %}
+
+{% block header_menu %}
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+        <form id="search_form" class="navbar-form navbar-left" role="search">
+            <div class="form-group">
+                <input type="text"  placeholder="Поиск">
+            </div>
+            <button type="submit" class="k-button">Поиск</button>
+        </form>
+        {% if is_authenticated %}
+        <ul class="nav navbar-nav navbar-right">
+            <li><span class="k-button add_term"><span class="glyphicon glyphicon-plus"></span> Добавить</span></li>
+            <li><a id="logout" href="#">Выход</a></li>
+        </ul>
+        {% else %}
+        <ul class="nav navbar-nav navbar-right">
+            <li><a href="/login/">Авторизоваться</a></li>
+        </ul>
+        {% endif %}
+    </div>
+    <!-- /.navbar-collapse -->
 {% endblock %}
 
 {% block content %}
 
     <div id="index">
-        {% for title in titles %}
-            <a class="letter" title="Слова на букву {{ title|slice:":1" }}">{{ title|slice:":1" }}</a>
-        {% empty %}
-            <a href="http://google.com" title="но я могу предложить кое-что другое">Извините, мне нечего вам показать</a>
-        {% endfor %}
+
     </div>
 
     <div id="terms"></div>
@@ -29,10 +45,56 @@
 
     <script type="text/x-kendo-template" id="term_template">
         <div class="term_item" >
-            <span class="title">#=title#</span>
+            <span class="title" title="Автор: #=author#">#=title#
+                # if (can_edit) { #
+                <span class="title_buttons" >
+                    <span class="k-button edit_term" title="Редактировать"><span class="glyphicon glyphicon-pencil"></span></span>
+                    <span class="k-button remove_term" title="Удалить"><span class="glyphicon glyphicon-remove"></span></span>
+                </span>
+                # } #
+            </span>
             <p  class="description">#=description#</p>
         </div>
     </script>
+
+    <div id="change_term_window" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Редактирование термина</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div id="change_term" class="k-edit-form-container" style="width: inherit;">
+                            <div class="k-edit-label">
+                                <label>Термин<span class="required">*</span>:</label>
+                            </div>
+                            <div class="k-edit-field">
+                                <input type="text" class="k-textbox" name="title" required placeholder="Термин"
+                                       style="width: 100%"
+                                       data-bind="value: o.title"/>
+                            </div>
+                            <div class="k-edit-label">
+                                <label>Описание<span class="required">*</span>:</label>
+                            </div>
+                            <div class="k-edit-field">
+                                <textarea
+                                        placeholder="Описание" class="k-textbox" required
+                                        data-bind="value: o.description" style="width: 100%; height: 150px;"> </textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Закрыть</button>
+                        <button id="term_save" type="button" class="btn btn-primary btn-sm">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 {% endblock %}
 

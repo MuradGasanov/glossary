@@ -4,6 +4,13 @@
     font-size: 25px;
 }
 
+.title .title_buttons {
+    display: inline-block;
+    font-size: 10px;
+    position: relative;
+    top: -6px;
+}
+
 .description {
     font-size: 15px;
 }
@@ -23,7 +30,7 @@
 }
 
 .term_item .description {
-    text-align:justify;
+    text-align: justify;
 }
 
 .k-pager-wrap {
