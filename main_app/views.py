@@ -115,7 +115,7 @@ def update_term(request):
     item = json.loads(request.POST.get("item"))
     term = models.Term.objects.get(id=item.get("id"))
 
-    if term.author.id != request.user.id:
+    if (term.author.id != request.user.id) or request.user.is_staff:
         return HttpResponseForbidden()
 
     term.title = item.get("title")
@@ -137,7 +137,7 @@ def remove_term(request):
     item = json.loads(request.POST.get("item"))
     term = models.Term.objects.get(id=item.get("id"))
 
-    if term.author.id != request.user.id:
+    if (term.author.id != request.user.id) or request.user.is_staff:
         return HttpResponseForbidden()
 
     term.delete()
