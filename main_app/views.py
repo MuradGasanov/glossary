@@ -107,7 +107,7 @@ def create_term(request):
         "description": new_term.description,
         "author": new_term.author.username,
         "author_id": new_term.author.id,
-        "can_edit": (new_term.author.id == request.user.id) or request.user.is_staff
+        "can_edit": True
     }), content_type="application/json")
 
 
@@ -115,8 +115,9 @@ def update_term(request):
     item = json.loads(request.POST.get("item"))
     term = models.Term.objects.get(id=item.get("id"))
 
-    if (term.author.id != request.user.id) or request.user.is_staff:
-        return HttpResponseForbidden()
+    if term.author.id != request.user.id:
+        if not request.user.is_staff:
+            return HttpResponseForbidden()
 
     term.title = item.get("title")
     term.description = item.get("description")
@@ -129,7 +130,7 @@ def update_term(request):
         "description": term.description,
         "author": term.author.username,
         "author_id": term.author.id,
-        "can_edit": (term.author.id == request.user.id) or request.user.is_staff
+        "can_edit": True
     }), content_type="application/json")
 
 
@@ -137,8 +138,9 @@ def remove_term(request):
     item = json.loads(request.POST.get("item"))
     term = models.Term.objects.get(id=item.get("id"))
 
-    if (term.author.id != request.user.id) or request.user.is_staff:
-        return HttpResponseForbidden()
+    if term.author.id != request.user.id:
+        if not request.user.is_staff:
+            return HttpResponseForbidden()
 
     term.delete()
 
