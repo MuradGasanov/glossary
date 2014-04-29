@@ -49,9 +49,25 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'gunicorn',
+    'social_auth',
 
     'main_app',
 )
+
+AUTHENTICATION_BACKENDS = (
+    'social_auth.backends.google.GoogleOAuth2Backend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+GOOGLE_OAUTH2_CLIENT_ID = '813279213220-rvslpqbcr6e0qjkucuelsc6lckdv2k7q.apps.googleusercontent.com'
+GOOGLE_OAUTH2_CLIENT_SECRET = '6Wuq0-l_EHqoG85SYVCshS-x'
+
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+
+LOGIN_REDIRECT_URL = '/'
+LOGIN_ERROR_URL = '/login_error/'
+
+GOOGLE_WHITE_LISTED_DOMAINS = ['apertura.su']
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -61,6 +77,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'main_app.middleware.MiddleWareProcess'
+    'social_auth.middleware.SocialAuthExceptionMiddleware'
 )
 
 ROOT_URLCONF = 'glossary.urls'

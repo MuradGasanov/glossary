@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static from staticfiles %}
+{% block title %}Страница входа - Глоссарий СКБ СТУ{% endblock %}
+
+{% block style %}
+    <style>
+        .center {
+            font-size: 25px;
+            text-align: center;
+        }
+    </style>
+{% endblock %}
+{% block script %}
+    <script type="text/JavaScript">
+        setTimeout("location.href = '/';", 3000);
+    </script>
+{% endblock %}
+{% block content %}
+    <div class="center">
+    Вы не можете быть авторизованы!
+    </div>
+{% endblock %}

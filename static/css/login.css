@@ -104,13 +104,11 @@ body {
 }
 
 .rLink {
-    padding: 0 6px 0 0;
-    font-size: 11px;
     float: right;
 }
 
 .box a {
-    color: #999;
+    color: #333;
 }
 
 .box a:hover, .box a:focus {

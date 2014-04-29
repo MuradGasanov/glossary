@@ -33,6 +33,10 @@ def log_in(request):
         return HttpResponse(json.dumps({"error": ["Неверный логин и пароль"]}), content_type="application/json")
 
 
+def login_error(request):
+    return render_to_response("login_error.html")
+
+
 def log_out(request):
     logout(request)
     return HttpResponseRedirect("/")
