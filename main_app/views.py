@@ -34,7 +34,8 @@ def log_in(request):
 
 
 def login_error(request):
-    return render_to_response("login_error.html")
+    return render_to_response("login.html", {"error": "Вы не можете быть авторизованны,"
+                                                      " доступ разрешен только для домена apertura.su"})
 
 
 def log_out(request):
