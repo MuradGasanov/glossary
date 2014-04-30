@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render_to_response, HttpResponse, HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from main_app import models
 from datetime import *
@@ -94,6 +95,7 @@ def get_terms(request):
     return HttpResponse(json.dumps({"items": items, "total": total}), content_type="application/json")
 
 
+@login_required(redirect_field_name=None)
 def create_term(request):
     item = json.loads(request.POST.get("item"))
 
@@ -116,6 +118,7 @@ def create_term(request):
     }), content_type="application/json")
 
 
+@login_required(redirect_field_name=None)
 def update_term(request):
     item = json.loads(request.POST.get("item"))
     term = models.Term.objects.get(id=item.get("id"))
@@ -139,6 +142,7 @@ def update_term(request):
     }), content_type="application/json")
 
 
+@login_required(redirect_field_name=None)
 def remove_term(request):
     item = json.loads(request.POST.get("item"))
     term = models.Term.objects.get(id=item.get("id"))

@@ -67,6 +67,8 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 LOGIN_REDIRECT_URL = '/'
 LOGIN_ERROR_URL = '/login_error/'
 
+LOGIN_URL = "/login/"
+
 GOOGLE_WHITE_LISTED_DOMAINS = ['apertura.su']
 
 MIDDLEWARE_CLASSES = (
