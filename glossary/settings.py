@@ -69,7 +69,7 @@ LOGIN_ERROR_URL = '/login_error/'
 
 LOGIN_URL = "/login/"
 
-GOOGLE_WHITE_LISTED_DOMAINS = ['apertura.su']
+GOOGLE_WHITE_LISTED_DOMAINS = ['apertura.su', 'oaokrd.ru']
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
