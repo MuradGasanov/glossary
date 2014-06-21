@@ -5,7 +5,6 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from main_app import models
 from datetime import *
-from dateutil import tz
 import json
 
 
