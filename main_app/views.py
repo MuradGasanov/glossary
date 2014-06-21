@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from main_app import models
 from datetime import *
+from dateutil import tz
 import json
 
 
@@ -49,9 +50,12 @@ def index(request):
 
 
 def get_titles(request):
-    titles = list(models.Term.objects.extra(
-        select={"t": "UPPER(LEFT(title,1))"}
-    ).values_list("t", flat=True).distinct().order_by("t"))
+    project = request.POST.get("project")
+    titles = models.Term.objects.extra(
+        select={"t": "UPPER(LEFT(title,1))"})
+    if project:
+        titles = titles.filter(project_id=int(project))
+    titles = list(titles.values_list("t", flat=True).distinct().order_by("t"))
     return HttpResponse(json.dumps({"items": titles}), content_type="application/json")
 
 
@@ -68,12 +72,22 @@ def get_terms(request):
         take = options.get("take", None)
         query = options.get("query", "")
         start_width = options.get("start_width", False)
+        project = options.get("project", 0)
+        sort_by_name = options.get("sort_by_name", True)
+
+        if sort_by_name:
+            terms = terms.order_by("title")
+        else:
+            terms = terms.order_by("-create_at")
 
         if query:
             if start_width:
                 terms = terms.filter(title__istartswith=query)
             else:
                 terms = terms.filter(title__icontains=query)
+
+        if project:
+            terms = terms.filter(project_id=int(project))
 
         total = terms.count()
         terms = terms[skip:skip + take]
@@ -89,6 +103,9 @@ def get_terms(request):
             "description": term.description,
             "author": term.author.username,
             "author_id": term.author.id,
+            "project": term.project.name if term.project else "",
+            "project_id": term.project.id if term.project else "",
+            "create_at": str(term.create_at),
             "can_edit": (term.author.id == request.user.id) or request.user.is_staff
         })
 
@@ -102,9 +119,19 @@ def create_term(request):
     if not request.user.is_authenticated():
         return HttpResponseForbidden()
 
+    project = item.get("project", 0)
+    if type(project) == unicode and len(project) != 0:
+        project = models.Project.objects.create(name=project, author=request.user)
+    elif type(project) == int and project != 0:
+        project = models.Project.objects.get(id=project)
+    else:
+        project = None
+
     new_term = models.Term.objects.create(
         title=item.get("title"),
         description=item.get("description"),
+        project=project,
+        create_at=datetime.now(),
         author=request.user
     )
 
@@ -114,6 +141,9 @@ def create_term(request):
         "description": new_term.description,
         "author": new_term.author.username,
         "author_id": new_term.author.id,
+        "project": new_term.project.name if new_term.project else "",
+        "project_id": new_term.project.id if new_term.project else "",
+        "create_at": str(new_term.create_at),
         "can_edit": True
     }), content_type="application/json")
 
@@ -127,8 +157,18 @@ def update_term(request):
         if not request.user.is_staff:
             return HttpResponseForbidden()
 
+    project = item.get("project", 0)
+    if type(project) == unicode and len(project) != 0:
+        project = models.Project.objects.create(name=project, author=request.user)
+    elif type(project) == int and project != 0:
+        project = models.Project.objects.get(id=project)
+    else:
+        project = None
+
     term.title = item.get("title")
     term.description = item.get("description")
+    term.project = project
+    term.create_at = datetime.now()
 
     term.save()
 
@@ -138,6 +178,9 @@ def update_term(request):
         "description": term.description,
         "author": term.author.username,
         "author_id": term.author.id,
+        "project": term.project.name if term.project else "",
+        "project_id": term.project.id if term.project else "",
+        "create_at": str(term.create_at),
         "can_edit": True
     }), content_type="application/json")
 
@@ -153,9 +196,25 @@ def remove_term(request):
 
     term.delete()
 
-    return HttpResponse(json.dumps("ok"), content_type="application/json")
+    return HttpResponse("ok", content_type="application/json")
+
+
+def get_projects(request):
+    projects = list(models.Project.objects.all().order_by("name").values("id", "name"))
+
+    if projects:
+        return HttpResponse(json.dumps(projects), content_type="application/json")
+    else:
+        return HttpResponse("[]", content_type="application/json")
 
 
 def search_suggestions(request):
-    titles = list(models.Term.objects.all().values_list("title", flat=True))
+    project = request.POST.get("project", 0)
+    titles = models.Term.objects.all()
+
+    if project:
+        titles = titles.filter(project=int(project))
+
+    titles = list(titles.values_list("title", flat=True))
+
     return HttpResponse(json.dumps(titles), content_type="application/json")

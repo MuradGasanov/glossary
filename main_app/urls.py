@@ -12,5 +12,6 @@ urlpatterns = patterns('',
     url(r'^term/create/$', create_term),
     url(r'^term/update/$', update_term),
     url(r'^term/remove/$', remove_term),
+    url(r'^term/get_projects/$', get_projects),
     url(r'^search_suggestions/$', search_suggestions),
 )

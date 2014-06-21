@@ -12,7 +12,15 @@
 }
 
 .description {
-    font-size: 15px;
+    font-size: 17px;
+    margin-bottom: 3px;
+}
+
+.author {
+    font-size: 11px;
+    font-style: italic;
+    opacity: 0.7;
+    margin-bottom: 5px;
 }
 
 #terms.k-widget {

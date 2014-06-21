@@ -10,7 +10,8 @@ $(document).ready(function (e) {
 
     var GLOBAL_OPTIONS = {
         query: "",
-        start_width: false
+        start_width: false,
+        sort_by_name: true
     };
 
     var MESSAGE = {
@@ -18,12 +19,53 @@ $(document).ready(function (e) {
         error: "Ошибка: "
     };
 
+    kendo.culture("ru-RU");
+
+    $('.btn-toggle').click(function() {
+        $(this).find('.btn').toggleClass('active');
+
+        if ($(this).find('.btn-primary').size()>0) {
+            $(this).find('.btn').toggleClass('btn-primary');
+        }
+
+        $(this).find('.btn').toggleClass('btn-default');
+
+        GLOBAL_OPTIONS.sort_by_name = !(GLOBAL_OPTIONS.sort_by_name);
+        console.log(GLOBAL_OPTIONS.sort_by_name );
+        pager.page(1);
+    });
+
     $("#logout").click(function () {
         document.location.href='/logout/';
     });
 
+    var project = $("#products").kendoDropDownList({
+        dataSource: {
+            type: "json",
+            transport: {
+                read: {
+                    url: BASE_URL + "term/get_projects/",
+                    dataType: "json",
+                    type: "POST"
+                }
+            }
+        },
+        dataTextField: "name",
+        dataValueField: "id",
+        optionLabel: "Все проекты",
+        change: function () {
+            GLOBAL_OPTIONS.query = "";
+            GLOBAL_OPTIONS.start_width = false;
+            search_query.dataSource.read();
+            title_render();
+            pager.page(1);
+            //terms_data_source.read();
+        }
+    }).data("kendoDropDownList");
+
     function title_render() {
-        $.post("/get_titles/", { },function (data) {
+        var pr = project.value();
+        $.post(BASE_URL + "get_titles/", {project: pr} ,function (data) {
             var index = $("#index");
             index.empty();
             if (data.items.length > 0) {
@@ -56,7 +98,9 @@ $(document).ready(function (e) {
                         take: options.take,
                         skip: options.skip,
                         query: GLOBAL_OPTIONS.query,
-                        start_width: GLOBAL_OPTIONS.start_width
+                        start_width: GLOBAL_OPTIONS.start_width,
+                        sort_by_name: GLOBAL_OPTIONS.sort_by_name,
+                        project: project.value()
                     };
                     return {options: kendo.stringify(o)};
                 }
@@ -113,33 +157,32 @@ $(document).ready(function (e) {
                 read: {
                     dataType: "json",
                     type: "POST",
-                    url: BASE_URL + "search_suggestions/"
+                    url: BASE_URL + "search_suggestions/" ///поисковые подсказки, при вводе в строку поиска
+                },
+                parameterMap: function (options, operation) {
+                    if (operation == "read") {
+                        return {project: project.value()};
+                    }
                 }
-//                    parameterMap: function(data, type) {
-//                        console.log(data, type);
-//                        if (type == "read") {
-//                            return {filter: JSON.stringify(data.filter.filters[0].value)}
-//                        }
-//                    }
             }
         },
         filter: "contains"
 //            placeholder: "Поиск",
     }).data("kendoAutoComplete");
 
-    $("#search_form").submit(function(e) {
+    $("#search_form").submit(function(e) { // Поис в форме по совпадению
         GLOBAL_OPTIONS.query = search_query.value();
         GLOBAL_OPTIONS.start_width = false;
         pager.page(1);
-        terms_data_source.read();
+        //terms_data_source.read();
         return false;
     });
 
-    $("#index").on("click", ".letter", function(e) {
+    $("#index").on("click", ".letter", function(e) { //Поиск по индесу по первой букве
         GLOBAL_OPTIONS.query = $(this).text();
         GLOBAL_OPTIONS.start_width = true;
         pager.page(1);
-        terms_data_source.read();
+        //terms_data_source.read();
         return false;
     });
 
@@ -147,16 +190,18 @@ $(document).ready(function (e) {
         GLOBAL_OPTIONS.query = "";
         GLOBAL_OPTIONS.start_width = false;
         pager.page(1);
-        terms_data_source.read();
+        //terms_data_source.read();
         return false;
     });
 
     var term_model = kendo.observable({
         is_edit: false,
+        projects: "",
         o: {
             id: 0,
             title: "",
-            description: ""
+            description: "",
+            project: ""
         }
     });
     kendo.bind("#change_term", term_model);
@@ -178,10 +223,12 @@ $(document).ready(function (e) {
     $(".add_term").click(function () {
         $(".k-widget.k-tooltip.k-tooltip-validation.k-invalid-msg").hide();
         term_model.set("is_edit", false);
+        term_model.set("projects", project.dataSource.data());
         term_model.set("o", {
             id: 0,
             title: "",
-            description: ""
+            description: "",
+            project: ""
         });
         change_term_window.modal("show");
     });
@@ -192,10 +239,12 @@ $(document).ready(function (e) {
         if (data) {
             data.title = response.title;
             data.description = response.description;
+            data.project = response.project_id;
         } else {
             terms_data_source.insert(0, response);
         }
         noti();
+        project.dataSource.read();
         terms.refresh();
         title_render();
         change_term_window.modal("hide");
@@ -219,10 +268,12 @@ $(document).ready(function (e) {
         if (dataItem) {
             $(".k-widget.k-tooltip.k-tooltip-validation.k-invalid-msg").hide();
             term_model.set("is_edit", true);
+            term_model.set("projects", project.dataSource.data());
             term_model.set("o", {
                 id: dataItem.id,
                 title: dataItem.title,
-                description: dataItem.description
+                description: dataItem.description,
+                project: dataItem.project_id
             });
             change_term_window.modal("show");
         }
