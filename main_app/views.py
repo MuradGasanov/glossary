@@ -4,8 +4,13 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from main_app import models
-from datetime import *
+import datetime
 import json
+
+dt_handler = lambda obj: (
+    obj.isoformat() if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date)
+    else None
+)
 
 
 def log_in(request):
@@ -25,7 +30,7 @@ def log_in(request):
 
     if user:
         login(request, user)
-        request.session.set_expiry(timedelta(days=1).seconds)
+        request.session.set_expiry(datetime.timedelta(days=1).seconds)
         if user.is_active:
             return HttpResponse(json.dumps({"error": []}), content_type="application/json")
         else:
@@ -104,11 +109,11 @@ def get_terms(request):
             "author_id": term.author.id,
             "project": term.project.name if term.project else "",
             "project_id": term.project.id if term.project else "",
-            "create_at": str(term.create_at),
+            "create_at": term.create_at,
             "can_edit": (term.author.id == request.user.id) or request.user.is_staff
         })
 
-    return HttpResponse(json.dumps({"items": items, "total": total}), content_type="application/json")
+    return HttpResponse(json.dumps({"items": items, "total": total}, default=dt_handler), content_type="application/json")
 
 
 @login_required(redirect_field_name=None)
@@ -130,7 +135,7 @@ def create_term(request):
         title=item.get("title"),
         description=item.get("description"),
         project=project,
-        create_at=datetime.now(),
+        create_at=datetime.datetime.now(),
         author=request.user
     )
 
@@ -142,9 +147,9 @@ def create_term(request):
         "author_id": new_term.author.id,
         "project": new_term.project.name if new_term.project else "",
         "project_id": new_term.project.id if new_term.project else "",
-        "create_at": str(new_term.create_at),
+        "create_at": new_term.create_at,
         "can_edit": True
-    }), content_type="application/json")
+    }, default=dt_handler), content_type="application/json")
 
 
 @login_required(redirect_field_name=None)
@@ -167,7 +172,7 @@ def update_term(request):
     term.title = item.get("title")
     term.description = item.get("description")
     term.project = project
-    term.create_at = datetime.now()
+    term.create_at = datetime.datetime.now()
 
     term.save()
 
@@ -179,9 +184,9 @@ def update_term(request):
         "author_id": term.author.id,
         "project": term.project.name if term.project else "",
         "project_id": term.project.id if term.project else "",
-        "create_at": str(term.create_at),
+        "create_at": term.create_at,
         "can_edit": True
-    }), content_type="application/json")
+    }, default=dt_handler), content_type="application/json")
 
 
 @login_required(redirect_field_name=None)
